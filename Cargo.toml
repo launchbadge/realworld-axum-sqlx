@@ -1,0 +1,27 @@
+[package]
+name = "realworld-axum-sqlx"
+version = "0.1.0"
+edition = "2021"
+publish = false
+authors = [
+    "Austin Bonander <austin@launchbadge.com>"
+]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
+axum = "0.3.4"
+tower = "0.4.11"
+sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "postgres"] }
+
+# The `clap` beta gives us a much nicer way to define configuration parameters for our application.
+clap = "3.0.0-beta.5"
+
+serde = { version = "1.0.130", features = ["derive"] }
+
+# Utility Crates
+anyhow = "1.0.48"
+dotenv = "0.15.0"
+env_logger = "0.9.0"
+log = "0.4.14"
