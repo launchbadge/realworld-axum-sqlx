@@ -10,18 +10,36 @@ authors = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# Core dependencies: runtime, HTTP framework and database client.
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
-axum = "0.3.4"
-tower = "0.4.11"
-sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "postgres"] }
+axum = { version = "0.3.4", features = ["tower-log"] }
+sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "postgres", "uuid"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.
 clap = "3.0.0-beta.5"
 
 serde = { version = "1.0.130", features = ["derive"] }
 
+# State of the art password hashing.
+argon2 = "0.3.1"
+
+# Axum builds on the types in Tower
+tower = "0.4.11"
+
+jwt = "0.15.0"
+hmac = "0.11.0"
+sha2 = "0.9.8"
+
+time = "0.2"
+
+
+uuid = { version = "0.8", features = ["serde"] }
+
 # Utility Crates
 anyhow = "1.0.48"
+async-trait = "0.1.51"
 dotenv = "0.15.0"
 env_logger = "0.9.0"
 log = "0.4.14"
+rand = "0.8.4"
+thiserror = "1.0.30"
