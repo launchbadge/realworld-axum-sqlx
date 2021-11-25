@@ -3,7 +3,7 @@ A Rust implementation of the [Realworld] demo app spec showcasing the use of the
 SQL database client, with [PostgreSQL] as the database backend.
 
 This project also serves as a commentary on the Realworld spec and how realistic it actually is, as well as what we at
-Launchbadge currently consider to be best practices.
+Launchbadge currently consider to be best practices. Feedback is appreciated!
 
 [Realworld]: https://gothinkster.github.io/realworld/
 [Axum]: https://github.com/tokio-rs/axum/

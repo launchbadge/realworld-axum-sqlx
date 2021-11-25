@@ -1044,6 +1044,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "hmac",
+ "itertools",
  "jwt",
  "log",
  "rand",

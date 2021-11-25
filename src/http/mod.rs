@@ -5,12 +5,17 @@ use sqlx::PgPool;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 
+// Utility modules.
 mod error;
 mod extractor;
+mod types;
+
+// Modules introducing API routes.
+mod articles;
 mod profiles;
 mod users;
 
-pub use error::Error;
+pub use error::{Error, ResultExt};
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -47,5 +52,8 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
 }
 
 fn api_router() -> Router {
-    users::router().merge(profiles::router())
+    // This is the order that the modules were authored in, if you're curious.
+    users::router()
+        .merge(profiles::router())
+        .merge(articles::router())
 }

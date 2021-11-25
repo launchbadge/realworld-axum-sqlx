@@ -26,11 +26,11 @@ struct ProfileBody {
 }
 
 #[derive(serde::Serialize)]
-struct Profile {
-    username: String,
-    bio: String,
-    image: Option<String>,
-    following: bool,
+pub struct Profile {
+    pub username: String,
+    pub bio: String,
+    pub image: Option<String>,
+    pub following: bool,
 }
 
 // https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#get-profile
