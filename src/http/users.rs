@@ -63,6 +63,11 @@ async fn create_user(
 ) -> Result<Json<UserBody<User>>> {
     let password_hash = hash_password(req.user.password).await?;
 
+    // We like using queries inline in our request handlers as it's easier to understand the
+    // query's semantics in the wider context of where it's invoked.
+    //
+    // Sometimes queries just get too darn big, though. In that case it may be a good idea
+    // to move the query to a separate module.
     let user_id = sqlx::query_scalar!(
         // language=PostgreSQL
         r#"insert into "user" (username, email, password_hash) values ($1, $2, $3) returning user_id"#,

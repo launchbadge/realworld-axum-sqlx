@@ -1,8 +1,9 @@
 # realworld-axum-sqlx
-A Rust implementation of the [Realworld] demo app spec using [Axum] and [SQLx], with [PostgreSQL] as the database
-backend.
+A Rust implementation of the [Realworld] demo app spec showcasing the use of the [Axum] web framework and [SQLx]
+SQL database client, with [PostgreSQL] as the database backend.
 
-Rust version: 1.56 (released Oct. 21, 2021)
+This project also serves as a commentary on the Realworld spec and how realistic it actually is, as well as what we at
+Launchbadge currently consider to be best practices.
 
 [Realworld]: https://gothinkster.github.io/realworld/
 [Axum]: https://github.com/tokio-rs/axum/
@@ -23,6 +24,9 @@ $ cd realworld-axum-sqlx
 Install Rust as described in [The Rust Programming Language, chapter 1](https://doc.rust-lang.org/book/ch01-01-installation.html).
 
 This is the official Rust language manual and is freely available on doc.rust-lang.org.
+
+The latest stable version is fine.
+
 
 ### Installing `sqlx-cli`
 

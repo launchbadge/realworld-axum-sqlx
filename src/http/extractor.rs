@@ -5,6 +5,7 @@ use axum::extract::{Extension, FromRequest, RequestParts};
 use crate::http::ApiContext;
 use async_trait::async_trait;
 use axum::http::header::AUTHORIZATION;
+use axum::http::HeaderValue;
 use hmac::{Hmac, NewMac};
 use jwt::{SignWithKey, VerifyWithKey};
 use sha2::Sha384;
@@ -13,12 +14,25 @@ use uuid::Uuid;
 
 const DEFAULT_SESSION_LENGTH: time::Duration = time::Duration::weeks(2);
 
+// Ideally the Realworld spec would use the `Bearer` scheme as that's relatively standard
+// and has parsers available, but it's really not that hard to parse anyway.
+const SCHEME_PREFIX: &str = "Token ";
+
 /// Add this as a parameter to a handler function to require the user to be logged in.
 ///
 /// Parses a JWT from the `Authorization: Token <token>` header.
 pub struct AuthUser {
     pub user_id: Uuid,
 }
+
+/// Add this as a parameter to a handler function to optionally check if the user is logged in.
+///
+/// If the `Authorization` header is absent then this will be `Self(None)`, otherwise it will
+/// validate the token.
+///
+/// This is in contrast to directly using `Option<AuthUser>`, which will be `None` if there
+/// is *any* error in deserializing, which isn't exactly what we want.
+pub struct MaybeAuthUser(pub Option<AuthUser>);
 
 #[derive(serde::Serialize, serde::Deserialize)]
 struct AuthUserClaims {
@@ -39,34 +53,13 @@ impl AuthUser {
         .sign_with_key(&hmac)
         .expect("HMAC signing should be infallible")
     }
-}
 
-// tower-http has a `RequireAuthorizationLayer` but it's useless for practical applications,
-// you essentially still have to hand-roll the `Authorization` header parsing. Why bother?
-#[async_trait]
-impl FromRequest for AuthUser {
-    type Rejection = Error;
-
-    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
-        // Ideally the Realworld spec would use the `Bearer` scheme as that's relatively standard
-        // and has parsers available, but it's really not that hard to parse anyway.
-        const SCHEME_PREFIX: &str = "Token ";
-
-        let context: Extension<ApiContext> = Extension::from_request(req)
-            .await
-            .expect("BUG: ApiContext was not added as an extension");
-
-        // Get the value of the `Authorization` header, if it was sent at all.
-        let auth_header = req
-            .headers()
-            .ok_or(Error::Unauthorized)?
-            .get(AUTHORIZATION)
-            .ok_or(Error::Unauthorized)?
-            .to_str()
-            .map_err(|_| {
-                log::debug!("Authorization header is not UTF-8");
-                Error::Unauthorized
-            })?;
+    /// Attempt to parse `Self` from an `Authorization` header.
+    fn from_authorization(ctx: &ApiContext, auth_header: &HeaderValue) -> Result<Self, Error> {
+        let auth_header = auth_header.to_str().map_err(|_| {
+            log::debug!("Authorization header is not UTF-8");
+            Error::Unauthorized
+        })?;
 
         if !auth_header.starts_with(SCHEME_PREFIX) {
             log::debug!(
@@ -91,7 +84,7 @@ impl FromRequest for AuthUser {
         // Realworld doesn't specify the signing algorithm for use with the JWT tokens
         // so we picked SHA-384 (HS-384) as the HMAC, as it is more difficult to brute-force
         // than SHA-256 (recommended by the JWT spec) at the cost of a slightly larger token.
-        let hmac = Hmac::<Sha384>::new_from_slice(context.config.hmac_key.as_bytes())
+        let hmac = Hmac::<Sha384>::new_from_slice(ctx.config.hmac_key.as_bytes())
             .expect("HMAC-SHA-384 can accept any key length");
 
         // When choosing a JWT implementation, be sure to check that it validates that the signing
@@ -136,5 +129,55 @@ impl FromRequest for AuthUser {
         Ok(Self {
             user_id: claims.user_id,
         })
+    }
+}
+
+impl MaybeAuthUser {
+    /// If this is `Self(Some(AuthUser))`, return `AuthUser::user_id`
+    pub fn user_id(&self) -> Option<Uuid> {
+        self.0.as_ref().map(|auth_user| auth_user.user_id)
+    }
+}
+
+// tower-http has a `RequireAuthorizationLayer` but it's useless for practical applications,
+// you essentially still have to hand-roll the `Authorization` header parsing. Why bother?
+#[async_trait]
+impl FromRequest for AuthUser {
+    type Rejection = Error;
+
+    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
+        let ctx: Extension<ApiContext> = Extension::from_request(req)
+            .await
+            .expect("BUG: ApiContext was not added as an extension");
+
+        // Get the value of the `Authorization` header, if it was sent at all.
+        let auth_header = req
+            .headers()
+            .ok_or(Error::Unauthorized)?
+            .get(AUTHORIZATION)
+            .ok_or(Error::Unauthorized)?;
+
+        Self::from_authorization(&ctx, auth_header)
+    }
+}
+
+#[async_trait]
+impl FromRequest for MaybeAuthUser {
+    type Rejection = Error;
+
+    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
+        let ctx: Extension<ApiContext> = Extension::from_request(req)
+            .await
+            .expect("BUG: ApiContext was not added as an extension");
+
+        Ok(Self(
+            // Get the value of the `Authorization` header, if it was sent at all.
+            req.headers()
+                .and_then(|headers| {
+                    let auth_header = headers.get(AUTHORIZATION)?;
+                    Some(AuthUser::from_authorization(&ctx, auth_header))
+                })
+                .transpose()?,
+        ))
     }
 }
