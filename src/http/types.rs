@@ -16,7 +16,7 @@ impl Serialize for Timestamptz {
     where
         S: Serializer,
     {
-        serializer.collect_str(&self.0.format(Format::Rfc3339))
+        serializer.collect_str(&self.0.lazy_format(Format::Rfc3339))
     }
 }
 
@@ -30,7 +30,7 @@ impl<'de> Deserialize<'de> for Timestamptz {
         // By providing our own `Visitor` impl, we can access the string data without copying.
         //
         // We could deserialize a borrowed `&str` directly but certain deserialization modes
-        // of `serde_json` don't support that, so we'd be forced to deserialize `String`.
+        // of `serde_json` don't support that, so we'd be forced to always deserialize `String`.
         impl Visitor<'_> for StrVisitor {
             type Value = Timestamptz;
 

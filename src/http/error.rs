@@ -15,7 +15,7 @@ pub enum Error {
     #[error("user may not perform that action")]
     Forbidden,
 
-    #[error("entity not found")]
+    #[error("request path not found")]
     NotFound,
 
     #[error("error in the request body")]

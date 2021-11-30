@@ -27,4 +27,4 @@ in the database to see which migrations have been applied and which haven't, and
 in ascending order by their version number.
 
 To ensure the database schema is always reproducible, SQLx also stores the content hash of applied migrations and
-checks them against the current contents of the files, o you **must not** change migrations that have already been applied.
+checks them against the current contents of the files, so you **must not** change migrations that have already been applied.

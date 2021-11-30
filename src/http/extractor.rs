@@ -140,7 +140,12 @@ impl MaybeAuthUser {
 }
 
 // tower-http has a `RequireAuthorizationLayer` but it's useless for practical applications,
-// you essentially still have to hand-roll the `Authorization` header parsing. Why bother?
+// as it only supports matching Basic or Bearer auth with credentials you provide it.
+//
+// There's the `::custom()` constructor to provide your own validator but it basically
+// requires parsing the `Authorization` header by-hand anyway so you really don't get anything
+// out of it that you couldn't write your own middleware for, except with a bunch of extra
+// boilerplate.
 #[async_trait]
 impl FromRequest for AuthUser {
     type Rejection = Error;
