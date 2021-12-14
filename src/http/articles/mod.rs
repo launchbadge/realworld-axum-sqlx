@@ -77,7 +77,9 @@ struct Article {
     body: String,
     tag_list: Vec<String>,
     created_at: Timestamptz,
-    updated_at: Option<Timestamptz>,
+    // Note: the Postman collection included with the spec assumes that this is never null.
+    // We prefer to leave it unset unless the row has actually be updated.
+    updated_at: Timestamptz,
     favorited: bool,
     favorites_count: i64,
     author: Profile,
@@ -97,7 +99,7 @@ struct ArticleFromQuery {
     body: String,
     tag_list: Vec<String>,
     created_at: Timestamptz,
-    updated_at: Option<Timestamptz>,
+    updated_at: Timestamptz,
     favorited: bool,
     favorites_count: i64,
     author_username: String,
@@ -135,9 +137,15 @@ impl ArticleFromQuery {
 async fn create_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
-    Json(req): Json<ArticleBody<CreateArticle>>,
+    Json(mut req): Json<ArticleBody<CreateArticle>>,
 ) -> Result<Json<ArticleBody>> {
     let slug = slugify(&req.article.title);
+
+    // Never specified unless you count just showing them sorted in the examples:
+    // https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format#single-article
+    //
+    // However, it is required by the Postman collection.
+    req.article.tag_list.sort();
 
     // For fun, this is how we combine several operations into a single query for brevity.
     let article = sqlx::query_as!(

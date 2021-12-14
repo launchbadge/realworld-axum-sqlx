@@ -45,8 +45,10 @@ pub struct FeedArticlesQuery {
 }
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct MultipleArticlesBody {
     articles: Vec<Article>,
+    articles_count: usize,
 }
 
 // https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#list-articles
@@ -56,7 +58,7 @@ pub(in crate::http) async fn list_articles(
     ctx: Extension<ApiContext>,
     query: Query<ListArticlesQuery>,
 ) -> http::Result<Json<MultipleArticlesBody>> {
-    let articles = sqlx::query_as!(
+    let articles: Vec<_> = sqlx::query_as!(
         ArticleFromQuery,
         // language=PostgreSQL
         r#"
@@ -119,7 +121,13 @@ pub(in crate::http) async fn list_articles(
         .try_collect()
         .await?;
 
-    Ok(Json(MultipleArticlesBody { articles }))
+    Ok(Json(MultipleArticlesBody {
+        // FIXME: this is probably supposed to be the *total* number of rows returned by the query.
+        //
+        // However, the Postman collection passes it as-is and the specification doesn't say.
+        articles_count: articles.len(),
+        articles,
+    }))
 }
 
 // https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#feed-articles
@@ -128,7 +136,7 @@ pub(in crate::http) async fn feed_articles(
     ctx: Extension<ApiContext>,
     query: Query<FeedArticlesQuery>,
 ) -> http::Result<Json<MultipleArticlesBody>> {
-    let articles = sqlx::query_as!(
+    let articles: Vec<_> = sqlx::query_as!(
         ArticleFromQuery,
         // As a rule of thumb, you always want the most specific dataset to be your outermost
         // `SELECT` so the query planner does as little extraneous work as possible, and then
@@ -177,5 +185,11 @@ pub(in crate::http) async fn feed_articles(
         .try_collect()
         .await?;
 
-    Ok(Json(MultipleArticlesBody { articles }))
+    Ok(Json(MultipleArticlesBody {
+        // FIXME: this is probably supposed to be the *total* number of rows returned by the query.
+        //
+        // However, the Postman collection passes it as-is and the specification doesn't say.
+        articles_count: articles.len(),
+        articles,
+    }))
 }

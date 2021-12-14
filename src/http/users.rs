@@ -33,7 +33,7 @@ struct NewUser {
 
 #[derive(serde::Deserialize)]
 struct LoginUser {
-    username: String,
+    email: String,
     password: String,
 }
 
@@ -103,16 +103,13 @@ async fn login_user(
     let user = sqlx::query!(
         r#"
             select user_id, email, username, bio, image, password_hash 
-            from "user" where username = $1
+            from "user" where email = $1
         "#,
-        req.user.username,
+        req.user.email,
     )
     .fetch_optional(&ctx.db)
     .await?
-    .ok_or(Error::unprocessable_entity([(
-        "username",
-        "does not exist",
-    )]))?;
+    .ok_or(Error::unprocessable_entity([("email", "does not exist")]))?;
 
     verify_password(req.user.password, user.password_hash).await?;
 

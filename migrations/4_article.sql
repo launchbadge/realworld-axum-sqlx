@@ -26,7 +26,11 @@ create table article
 
     -- These fields are actually in the Realworld spec so we will be making use of them.
     created_at  timestamptz not null default now(),
-    updated_at  timestamptz
+
+    -- The Realworld spec requires this to always be set,
+    -- but we prefer to leave it null unless the row has actually been updated.
+    -- It saves space as well as informs us whether a row has ever been updated or not.
+    updated_at timestamptz not null default now()
 );
 
 select trigger_updated_at('article');
@@ -88,7 +92,8 @@ create table article_comment
 
     created_at timestamptz not null default now(),
 
-    updated_at timestamptz
+    -- Same thing here.
+    updated_at timestamptz not null default now()
 );
 
 select trigger_updated_at('article_comment');

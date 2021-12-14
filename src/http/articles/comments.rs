@@ -42,7 +42,7 @@ struct AddComment {
 struct Comment {
     id: i64,
     created_at: Timestamptz,
-    updated_at: Option<Timestamptz>,
+    updated_at: Timestamptz,
     body: String,
     author: Profile,
 }
@@ -51,7 +51,7 @@ struct Comment {
 struct CommentFromQuery {
     comment_id: i64,
     created_at: OffsetDateTime,
-    updated_at: Option<OffsetDateTime>,
+    updated_at: OffsetDateTime,
     body: String,
     author_username: String,
     author_bio: String,
@@ -65,7 +65,7 @@ impl CommentFromQuery {
             id: self.comment_id,
             // doing this conversion in-code does save having to use the type overrides in query
             created_at: Timestamptz(self.created_at),
-            updated_at: self.updated_at.map(Timestamptz),
+            updated_at: Timestamptz(self.updated_at),
             body: self.body,
             author: Profile {
                 username: self.author_username,
