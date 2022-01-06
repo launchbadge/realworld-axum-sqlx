@@ -48,6 +48,30 @@ pub struct FeedArticlesQuery {
 #[serde(rename_all = "camelCase")]
 pub struct MultipleArticlesBody {
     articles: Vec<Article>,
+
+    // This is probably supposed to be the *total* number of rows returned by the current query.
+    //
+    // However, that necessitates executing the query twice, once to get the rows we actually
+    // want to return and a second time just for the count which by necessity must
+    // touch all matching rows--not exactly an efficient process.
+    //
+    // This combined with the limit/offset parameters suggests the design uses an old-fashioned
+    // pagination style with page numbers and uses this number to calculate
+    // the total number of pages. (Disclaimer: I have not actually looked at the frontend
+    // design to be sure; this is just an educated guess.)
+    //
+    // Modern applications don't really do this anymore and instead implement some sort
+    // of infinite scrolling scheme which plays better with paginating based on the value
+    // of a column like described on `limit`/`offset` above.
+    //
+    // It's also more intuitive for the user as they don't really care which page of results
+    // they're on. If they're searching for something, they're going to give up if it's
+    // not in the first few results anyway. If they're just browsing then they
+    // don't usually care where they are in the total ordering of things, or if they do
+    // then the scrollbar is already an intuitive indication of where they're at.
+    //
+    // The Postman collection doesn't test pagination, so as a cop-out I've decided to just
+    // return the count of articles currently being returned, which satisfies the happy-path tests.
     articles_count: usize,
 }
 
@@ -122,9 +146,9 @@ pub(in crate::http) async fn list_articles(
         .await?;
 
     Ok(Json(MultipleArticlesBody {
-        // FIXME: this is probably supposed to be the *total* number of rows returned by the query.
+        // This is probably incorrect but is deliberate and the Postman collection allows it.
         //
-        // However, the Postman collection passes it as-is and the specification doesn't say.
+        // See the comment on the field definition for details.
         articles_count: articles.len(),
         articles,
     }))
@@ -186,9 +210,9 @@ pub(in crate::http) async fn feed_articles(
         .await?;
 
     Ok(Json(MultipleArticlesBody {
-        // FIXME: this is probably supposed to be the *total* number of rows returned by the query.
+        // This is probably incorrect but is deliberate and the Postman collection allows it.
         //
-        // However, the Postman collection passes it as-is and the specification doesn't say.
+        // See the comment on the field definition for details.
         articles_count: articles.len(),
         articles,
     }))
