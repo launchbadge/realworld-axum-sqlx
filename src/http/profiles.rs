@@ -18,7 +18,7 @@ pub fn router() -> Router {
         )
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format#profile
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/api-response-format#profile
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 struct ProfileBody {
@@ -33,7 +33,7 @@ pub struct Profile {
     pub following: bool,
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#get-profile
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-profile
 async fn get_user_profile(
     // The Realworld spec says authentication is optional, but doesn't specify if it should be
     // validated if the `Authorization` header is present. I've chosen to do so.
@@ -72,7 +72,7 @@ async fn get_user_profile(
     Ok(Json(ProfileBody { profile }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#follow-user
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#follow-user
 async fn follow_user(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -133,7 +133,7 @@ async fn follow_user(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#unfollow-user
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#unfollow-user
 async fn unfollow_user(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,

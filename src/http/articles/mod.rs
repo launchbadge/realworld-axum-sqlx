@@ -133,7 +133,7 @@ impl ArticleFromQuery {
     }
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#create-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#create-article
 async fn create_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -142,7 +142,7 @@ async fn create_article(
     let slug = slugify(&req.article.title);
 
     // Never specified unless you count just showing them sorted in the examples:
-    // https://gothinkster.github.io/realworld/docs/specs/backend-specs/api-response-format#single-article
+    // https://realworld-docs.netlify.app/docs/specs/backend-specs/api-response-format#single-article
     //
     // However, it is required by the Postman collection.
     req.article.tag_list.sort();
@@ -198,7 +198,7 @@ async fn create_article(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#update-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#update-article
 async fn update_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -294,7 +294,7 @@ async fn update_article(
     Ok(Json(ArticleBody { article }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#delete-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#delete-article
 async fn delete_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -343,7 +343,7 @@ async fn delete_article(
     }
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#get-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-article
 async fn get_article(
     // The spec states "no authentication required" but should probably state
     // "authentication optional" because we still need to check if the user is following the author.
@@ -389,7 +389,7 @@ async fn get_article(
     Ok(Json(ArticleBody { article }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#favorite-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#favorite-article
 async fn favorite_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -430,7 +430,7 @@ async fn favorite_article(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#unfavorite-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#unfavorite-article
 async fn unfavorite_article(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -463,6 +463,34 @@ async fn unfavorite_article(
         article: article_by_id(&ctx.db, auth_user.user_id, article_id).await?,
     }))
 }
+
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-tags
+async fn get_tags(ctx: Extension<ApiContext>) -> Result<Json<TagsBody>> {
+    // Note: this query requires a full table scan and is a likely point for a DoS attack.
+    //
+    // In practice, I might consider storing unique tags in their own table and then the
+    // `tag_list` of an article would be a list of indexes into that table, and then
+    // this query can just dump that table. I have not implemented that here for the sake of brevity
+    // in the other queries fetching from the `article` table.
+    //
+    // Alternatively you could store the unique list of tags as a materialized view that is
+    // periodically refreshed, or cache the result of this query in application code,
+    // or simply apply a global rate-limit to this route. Each has its tradeoffs.
+    let tags = sqlx::query_scalar!(
+        r#"
+            select distinct tag "tag!"
+            from article, unnest (article.tag_list) tags(tag)
+            order by tag
+        "#
+    )
+    .fetch_all(&ctx.db)
+    .await?;
+
+    Ok(Json(TagsBody { tags }))
+}
+
+// End handler functions.
+// Begin utility functions.
 
 async fn article_by_id(
     e: impl Executor<'_, Database = Postgres>,
@@ -507,30 +535,6 @@ async fn article_by_id(
     Ok(article)
 }
 
-async fn get_tags(ctx: Extension<ApiContext>) -> Result<Json<TagsBody>> {
-    // Note: this query requires a full table scan and is a likely point for a DoS attack.
-    //
-    // In practice, I might consider storing unique tags in their own table and then the
-    // `tag_list` of an article would be a list of indexes into that table, and then
-    // this query can just dump that table. I have not implemented that here for the sake of brevity
-    // in the other queries fetching from the `article` table.
-    //
-    // Alternatively you could store the unique list of tags as a materialized view that is
-    // periodically refreshed, or cache the result of this query in application code,
-    // or simply apply a global rate-limit to this route. Each has its tradeoffs.
-    let tags = sqlx::query_scalar!(
-        r#"
-            select distinct tag "tag!"
-            from article, unnest (article.tag_list) tags(tag)
-            order by tag
-        "#
-    )
-    .fetch_all(&ctx.db)
-    .await?;
-
-    Ok(Json(TagsBody { tags }))
-}
-
 /// Convert a title string to a slug for identifying an article.
 ///
 /// E.g. `slugify("Doctests are the Bee's Knees") == "doctests-are-the-bees-knees"`
@@ -559,9 +563,11 @@ fn slugify(string: &str) -> String {
 
 // This fulfills the "at least one unit test" requirement of the Realworld spec.
 //
-// In general, we're not big fans of TDD at Launchbadge, because often you spend most of your time
-// thinking about how you're going to test your code, as opposed to getting the job done. At the
-// same time, you're making your code more difficult to read and reason about because
+// While opinions vary, in general, we're not big fans of TDD at Launchbadge,
+// because often you spend most of your time thinking about how you're going to test your code,
+// as opposed to getting the job done. When you're on a client's dime, that's really important.
+//
+// At the same time, you're making your code more difficult to read and reason about because
 // you're forced to separate the code from its dependencies for testing.
 //
 // For example, most of the handler functions in this API touch the database, which isn't
@@ -569,9 +575,18 @@ fn slugify(string: &str) -> String {
 // really not whole lot left to test. For what little is left, the logic should ideally
 // be self-evident, and then testing is just superfluous.
 //
-// Instead, we're big proponents of unit-testing what makes sense to unit-test,
+// Of course, testing is still really important. Manually testing the API every time you make
+// a change only goes so far, can become really unwieldy, and is easy to forget or neglect
+// to do because of that.
+//
+// I'm personally a big proponent of unit-testing only what makes sense to unit-test,
 // such as self-contained functions like `slugify()`. The rest can be covered with integration
-// testing, which fortunately the Realworld spec comes with an API integration test suite already.
+// or end-to-end testing, which we do a lot of at Launchbadge. That has the advantage of not
+// only covering the API, but the frontend as well.
+//
+// Fortunately, the Realworld spec comes with an API integration test suite already, although
+// in many places it doesn't cover much more than just the happy paths. I wish I had the time
+// and energy to help fill that out.
 #[test]
 fn test_slugify() {
     assert_eq!(

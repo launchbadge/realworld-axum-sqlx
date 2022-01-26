@@ -77,7 +77,7 @@ impl CommentFromQuery {
     }
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#get-comments-from-an-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-comments-from-an-article
 async fn get_article_comments(
     maybe_auth_user: MaybeAuthUser,
     ctx: Extension<ApiContext>,
@@ -117,7 +117,7 @@ async fn get_article_comments(
     Ok(Json(MultipleCommentsBody { comments }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#add-comments-to-an-article
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#add-comments-to-an-article
 async fn add_comment(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -160,7 +160,7 @@ async fn add_comment(
     Ok(Json(CommentBody { comment }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#delete-comment
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#delete-comment
 async fn delete_comment(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,

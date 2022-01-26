@@ -56,7 +56,7 @@ struct User {
     image: Option<String>,
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#registration
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#registration
 async fn create_user(
     ctx: Extension<ApiContext>,
     Json(req): Json<UserBody<NewUser>>,
@@ -95,7 +95,7 @@ async fn create_user(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#authentication
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#authentication
 async fn login_user(
     ctx: Extension<ApiContext>,
     Json(req): Json<UserBody<LoginUser>>,
@@ -127,7 +127,7 @@ async fn login_user(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#get-current-user
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-current-user
 async fn get_current_user(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
@@ -155,7 +155,7 @@ async fn get_current_user(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#update-user
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#update-user
 // Semantically, because this route allows a partial update it should be `PATCH`, not `PUT`.
 // However, we have a spec to follow so `PUT` it is.
 async fn update_user(

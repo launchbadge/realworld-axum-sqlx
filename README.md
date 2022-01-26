@@ -2,13 +2,62 @@
 A Rust implementation of the [Realworld] demo app spec showcasing the use of the [Axum] web framework and [SQLx]
 SQL database client, with [PostgreSQL] as the database backend.
 
-This project also serves as a commentary on the Realworld spec and how realistic it actually is, as well as what we at
-Launchbadge currently consider to be best practices. Feedback is appreciated!
+This project also serves as a commentary on the Realworld spec and how realistic it actually is, as well as
+what a particular senior developer at Launchbadge currently considers to be best practices. Best practices are always
+in flux, and a major point of this project was to experiment with project architecture and suss out what those
+best practices might look like.
+
+Feedback is appreciated!
+
+### Note: "I" vs "we"
+
+All comments in this project were (currently) written by a single person, and represent primarily that person's opinions
+and observations. When a comment uses "we", it does not necessarily indicate an authoritative position taken by 
+Launchbadge, but rather an interpretation, by that one person, of the current consensus at Launchbadge, 
+or an observation of a particular sentiment shared by several developers at Launchbadge.
 
 [Realworld]: https://gothinkster.github.io/realworld/
 [Axum]: https://github.com/tokio-rs/axum/
 [SQLX]: https://github.com/launchbadge/sqlx/
 [PostgreSQL]: https://www.postgresql.org/
+
+## Project Structure
+
+This project uses the 2015/1.0.0 module structure, with `mod.rs` files for modules with children,
+as opposed to the 2018 (or "new") module style introduced in [RFC 2126], where `mod.rs` files are optional
+and adding children to a module `foo.rs` is as simple as creating a `foo/` directory. 
+
+This is a style choice we vacillated on for a while at Launchbadge. However, we ultimately decided that the 2018
+module style results in a lot of papercuts during rapid development, which is antithetical to its original design.
+
+Namely, because most file management GUIs sort files separately from folders, you have to jump between two completely
+different places in the visualized file tree when transitioning between a parent module and its children. This is highly
+confusing to developers who were already used to the original module system when the 2018 style was introduced.
+
+This is made worse by the fact that there is no lint in `rustc` to enforce consistency*, so it becomes really easy
+to mix and match styles accidentally when multiple developers with varying experience levels are contributing to a project.
+
+\* Lints for this [were only recently added to Clippy][Clippy mod_module_files], 
+several years after the 2018 style was introduced. As of writing, the `rust-lang/rust` repo itself mixes both
+styles in various directories, which is frankly quite horrifying.
+
+[RFC 2126]: https://github.com/rust-lang/rfcs/blob/master/text/2126-path-clarity.md#the-modrs-file
+[Clippy mod_module_files]: https://github.com/rust-lang/rust-clippy/blob/master/clippy_lints/src/module_style.rs#L35
+
+### Code Tour
+
+If you're familiar with SQL, I recommend starting in the `migrations/` directory, as that's what contains the SQL files
+that define the schema of the PostgreSQL database, which is usually the first thing done when prototyping a new project. 
+The files there are filled with comments explaining the various decisions made while structuring the database,
+as well as advice on good practices for schema architecture and how this compares to the Realworld spec.
+
+Next, of course, is `main.rs` as the entrypoint for the application. It shows the typical boilerplate that goes
+into spinning up a Rust backend application.
+
+I then recommend going to `lib.rs` and recursively exploring the modules as they're defined.
+Comments on the module definitions will guide you from there.
+
+[`clap`]: https://github.com/clap-rs/clap/
 
 ## Setup
 

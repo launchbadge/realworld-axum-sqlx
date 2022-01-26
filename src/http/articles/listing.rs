@@ -75,7 +75,7 @@ pub struct MultipleArticlesBody {
     articles_count: usize,
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#list-articles
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#list-articles
 pub(in crate::http) async fn list_articles(
     // authentication is optional
     maybe_auth_user: MaybeAuthUser,
@@ -154,7 +154,7 @@ pub(in crate::http) async fn list_articles(
     }))
 }
 
-// https://gothinkster.github.io/realworld/docs/specs/backend-specs/endpoints#feed-articles
+// https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#feed-articles
 pub(in crate::http) async fn feed_articles(
     auth_user: AuthUser,
     ctx: Extension<ApiContext>,
