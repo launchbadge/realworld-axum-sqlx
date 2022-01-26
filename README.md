@@ -34,8 +34,15 @@ Namely, because most file management GUIs sort files separately from folders, yo
 different places in the visualized file tree when transitioning between a parent module and its children. This is highly
 confusing to developers who were already used to the original module system when the 2018 style was introduced.
 
-This is made worse by the fact that there is no lint in `rustc` to enforce consistency*, so it becomes really easy
-to mix and match styles accidentally when multiple developers with varying experience levels are contributing to a project.
+On its own, this would have been manageable, but it is made worse by the fact that the new style isn't
+recommended by default in the 2018 edition and there is no lint in `rustc` to enforce consistency*, so it becomes really 
+easy to mix and match styles accidentally when multiple developers with varying experience levels are contributing to a 
+project, or jumping back and forth between projects.
+
+In retrospect, the 2018 edition should have involved a wholesale transition, banning `mod.rs` files by default and
+providing a migration path with `cargo fix`, like with the other changes proposed in RFC 2126. 
+I understand why the language team was hesitant to do this, as it had the weakest set of justifications of all
+the changes proposed in the RFC, but their indecision resulted in, IMHO, a far, far worse situation.
 
 \* Lints for this [were only recently added to Clippy][Clippy mod_module_files], 
 several years after the 2018 style was introduced. As of writing, the `rust-lang/rust` repo itself mixes both
