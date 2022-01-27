@@ -51,8 +51,11 @@ jobs:
         repository: gothinkster/realworld
         ref: a3855ae3a346e7bcb809dcddcc057bd13edc0c19
         path: realworld
-    - name: Run integration tests
+    - name: Run Realworld Postman collection
+      env:
+        APIURL: http://localhost:8080/api
       run: |
         cargo run&
+        sleep 5
         cd realworld/api
-        ./run-tests.sh
+        ./run-api-tests.sh
