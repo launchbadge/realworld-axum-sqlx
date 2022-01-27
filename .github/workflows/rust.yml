@@ -53,5 +53,5 @@ jobs:
     - name: Run integration tests
       run: |
         cargo run&
-        cd ../realworld/api
+        cd realworld/api
         ./run-tests.sh
