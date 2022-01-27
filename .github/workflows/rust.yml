@@ -33,6 +33,7 @@ jobs:
           - 5432:5432
     env:
       DATABASE_URL: postgresql://postgres:password@localhost/realworld_axum_sqlx
+      HMAC_KEY: 2b6c3e9caa0215a0c05c9b220479a4d30c7099233f66f862382945c17b6b607f2ef5efdb0229134692210905b0ebdc19
     
     steps:
     - uses: actions/checkout@v2
