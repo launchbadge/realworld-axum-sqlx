@@ -29,8 +29,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
     env:
-      DATABASE_URL: postgresql://postgres:password@postgres/realworld_axum_sqlx
+      DATABASE_URL: postgresql://postgres:password@localhost/realworld_axum_sqlx
     
     steps:
     - uses: actions/checkout@v2
