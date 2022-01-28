@@ -130,23 +130,25 @@ impl IntoResponse for Error {
 
                 return (StatusCode::UNPROCESSABLE_ENTITY, Json(Errors { errors })).into_response();
             }
-            Self::Unauthorized => (
-                self.status_code(),
-                // Include the `WWW-Authenticate` challenge required in the specification
-                // for the `401 Unauthorized` response code:
-                // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
-                //
-                // The Realworld spec does not specify this:
-                // https://realworld-docs.netlify.app/docs/specs/backend-specs/error-handling
-                //
-                // However, at Launchbadge we try to adhere to web standards wherever possible,
-                // if nothing else than to try to act as a vanguard of sanity on the web.
-                [(WWW_AUTHENTICATE, HeaderValue::from_static("Token"))]
-                    .into_iter()
-                    .collect::<HeaderMap>(),
-                self.to_string(),
-            )
-                .into_response(),
+            Self::Unauthorized => {
+                return (
+                    self.status_code(),
+                    // Include the `WWW-Authenticate` challenge required in the specification
+                    // for the `401 Unauthorized` response code:
+                    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+                    //
+                    // The Realworld spec does not specify this:
+                    // https://realworld-docs.netlify.app/docs/specs/backend-specs/error-handling
+                    //
+                    // However, at Launchbadge we try to adhere to web standards wherever possible,
+                    // if nothing else than to try to act as a vanguard of sanity on the web.
+                    [(WWW_AUTHENTICATE, HeaderValue::from_static("Token"))]
+                        .into_iter()
+                        .collect::<HeaderMap>(),
+                    self.to_string(),
+                )
+                    .into_response();
+            }
 
             Self::Sqlx(e) => {
                 // TODO: we probably want to use `tracing` instead
