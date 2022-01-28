@@ -49,6 +49,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: gothinkster/realworld
+        # FIXME: we actually require this PR for the tests to pass: https://github.com/gothinkster/realworld/pull/490
         ref: a3855ae3a346e7bcb809dcddcc057bd13edc0c19
         path: realworld
     - name: Run Realworld Postman collection

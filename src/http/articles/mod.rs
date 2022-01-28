@@ -144,7 +144,9 @@ async fn create_article(
     // Never specified unless you count just showing them sorted in the examples:
     // https://realworld-docs.netlify.app/docs/specs/backend-specs/api-response-format#single-article
     //
-    // However, it is required by the Postman collection.
+    // However, it is required by the Postman collection. To their credit, the Realworld authors
+    // have acknowledged this oversight and are willing to loosen the requirement:
+    // https://github.com/gothinkster/realworld/issues/839#issuecomment-1002806224
     req.article.tag_list.sort();
 
     // For fun, this is how we combine several operations into a single query for brevity.
@@ -424,7 +426,6 @@ async fn favorite_article(
     .await?
     .ok_or(Error::NotFound)?;
 
-    // It didn't really seem necessary to put this in a transaction.
     Ok(Json(ArticleBody {
         article: article_by_id(&ctx.db, auth_user.user_id, article_id).await?,
     }))
@@ -438,6 +439,8 @@ async fn unfavorite_article(
 ) -> Result<Json<ArticleBody>> {
     // The Realworld spec doesn't say what to do if the user calls this on an article
     // that they haven't favorited. I've chosen to just do nothing as that's the easiest.
+    //
+    // The Postman collection doesn't test that case.
 
     let article_id = sqlx::query_scalar!(
         r#"
@@ -458,7 +461,6 @@ async fn unfavorite_article(
     .await?
     .ok_or(Error::NotFound)?;
 
-    // It didn't really seem necessary to put this in a transaction.
     Ok(Json(ArticleBody {
         article: article_by_id(&ctx.db, auth_user.user_id, article_id).await?,
     }))
@@ -492,6 +494,10 @@ async fn get_tags(ctx: Extension<ApiContext>) -> Result<Json<TagsBody>> {
 // End handler functions.
 // Begin utility functions.
 
+// This is used in a few different places so it makes sense to extract into its own function.
+//
+// I usually throw stuff like this at the bottom of the file but other engineers like
+// to put these kinds of functions in their own modules. Po-tay-to po-tah-to.
 async fn article_by_id(
     e: impl Executor<'_, Database = Postgres>,
     user_id: Uuid,
@@ -538,6 +544,8 @@ async fn article_by_id(
 /// Convert a title string to a slug for identifying an article.
 ///
 /// E.g. `slugify("Doctests are the Bee's Knees") == "doctests-are-the-bees-knees"`
+///
+// (Sadly, doctests are not run on private functions it seems.)
 fn slugify(string: &str) -> String {
     const QUOTE_CHARS: &[char] = &['\'', '"'];
 

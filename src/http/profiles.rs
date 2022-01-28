@@ -89,7 +89,7 @@ async fn follow_user(
     // because you were too clever. You can always improve performance later if the
     // implementation proves to be a bottleneck.
     //
-    // Readability is also tantamount if you need to onboard more devs to the project.
+    // Readability is also paramount if you need to onboard more devs to the project.
     //
     // Trust me, I've learned this the hard way.
 

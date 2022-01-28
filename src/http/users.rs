@@ -63,7 +63,7 @@ async fn create_user(
 ) -> Result<Json<UserBody<User>>> {
     let password_hash = hash_password(req.user.password).await?;
 
-    // We like using queries inline in our request handlers as it's easier to understand the
+    // I personally prefer using queries inline in request handlers as it's easier to understand the
     // query's semantics in the wider context of where it's invoked.
     //
     // Sometimes queries just get too darn big, though. In that case it may be a good idea

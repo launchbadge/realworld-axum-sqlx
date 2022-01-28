@@ -34,7 +34,6 @@ sha2 = "0.9.8"
 
 time = "0.2"
 
-
 uuid = { version = "0.8", features = ["serde"] }
 
 # Utility Crates
