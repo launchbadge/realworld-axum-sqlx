@@ -151,6 +151,8 @@ With everything else set up, all you should have to do at this point is:
 $ cargo run
 ```
 
+If successful, the Realworld-compatible API is now listening at port 8080.
+
 ## License
 
 All code in this project is licensed under the [GNU Affero General Public License (AGPL)][AGPL]. 
