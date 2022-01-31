@@ -144,8 +144,26 @@ $ sqlx db setup
 
 ### Starting the Application
 
-With the everything else set up, all you should have to do at this point is:
+With everything else set up, all you should have to do at this point is:
 
 ```
 $ cargo run
 ```
+
+## License
+
+All code in this project is licensed under the [GNU Affero General Public License (AGPL)][AGPL]. 
+
+The AGPL is an extension of the GPL which includes interacting with the application over a computer network in its 
+definition of "distribution" for applying the license terms. If you modify this project and host it in a location that
+is accessible to the web, you must make the source available as per the terms of the license.
+
+See [LICENSE](LICENSE) in this repository for the text of the AGPL.
+
+[AGPL]: https://www.gnu.org/licenses/agpl-3.0.en.html
+
+### Contributing
+
+Because enforcement of the AGPL requires that we own the copyright on the whole project, any contributions
+to this project must be explicitly assigned copyright to Launchbadge, LLC. We're still researching the best
+route to do this, so while we will allow PRs to be opened against this repository, they may not be merged right away.
