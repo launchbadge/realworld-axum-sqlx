@@ -95,7 +95,7 @@ $ cargo install sqlx-cli --features postgres
 
 ### Running Postgres
 
-By far the easiest way to run Postgres these days is using a container with a pre-built image.
+By far the easiest way to run Postgres these days is using a container with [a pre-built image][docker-postgres].
 
 The following command will start version 14 of Postgres (the latest at time of writing) using [Docker] 
 (this command should also work with [Podman], a daemonless FOSS alternative).
@@ -115,6 +115,7 @@ CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS   
 621eb8962016   postgres:14   "docker-entrypoint.s…"   30 seconds ago   Up 30 seconds   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   postgres-14
 ```
 
+[docker-postgres]: https://hub.docker.com/_/postgres
 [Docker]: https://www.docker.com/
 [Podman]: https://podman.io/
 
