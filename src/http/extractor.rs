@@ -1,11 +1,11 @@
 use crate::http::error::Error;
-use axum::body::Body;
 use axum::extract::{Extension, FromRequest, RequestParts};
 
 use crate::http::ApiContext;
 use async_trait::async_trait;
 use axum::http::header::AUTHORIZATION;
 use axum::http::HeaderValue;
+use axum::BoxError;
 use hmac::{Hmac, NewMac};
 use jwt::{SignWithKey, VerifyWithKey};
 use sha2::Sha384;
@@ -147,10 +147,14 @@ impl MaybeAuthUser {
 // out of it that you couldn't write your own middleware for, except with a bunch of extra
 // boilerplate.
 #[async_trait]
-impl FromRequest for AuthUser {
+impl<B> FromRequest<B> for AuthUser
+where
+    B: http_body::Body + Send,
+    B::Data: Send,
+    B::Error: Into<BoxError>,
+{
     type Rejection = Error;
-
-    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let ctx: Extension<ApiContext> = Extension::from_request(req)
             .await
             .expect("BUG: ApiContext was not added as an extension");
@@ -167,10 +171,15 @@ impl FromRequest for AuthUser {
 }
 
 #[async_trait]
-impl FromRequest for MaybeAuthUser {
+impl<B> FromRequest<B> for MaybeAuthUser
+where
+    B: http_body::Body + Send,
+    B::Data: Send,
+    B::Error: Into<BoxError>,
+{
     type Rejection = Error;
 
-    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
+    async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let ctx: Extension<ApiContext> = Extension::from_request(req)
             .await
             .expect("BUG: ApiContext was not added as an extension");
