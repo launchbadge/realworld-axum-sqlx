@@ -1153,7 +1153,6 @@ dependencies = [
  "env_logger",
  "futures",
  "hmac 0.12.0",
- "http-body",
  "itertools",
  "jwt",
  "log",

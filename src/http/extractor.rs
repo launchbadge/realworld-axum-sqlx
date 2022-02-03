@@ -5,7 +5,6 @@ use crate::http::ApiContext;
 use async_trait::async_trait;
 use axum::http::header::AUTHORIZATION;
 use axum::http::HeaderValue;
-use axum::BoxError;
 use hmac::{Hmac, Mac};
 use jwt::{SignWithKey, VerifyWithKey};
 use sha2::Sha384;
@@ -149,9 +148,7 @@ impl MaybeAuthUser {
 #[async_trait]
 impl<B> FromRequest<B> for AuthUser
 where
-    B: http_body::Body + Send,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
+    B: Send,
 {
     type Rejection = Error;
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
@@ -173,9 +170,7 @@ where
 #[async_trait]
 impl<B> FromRequest<B> for MaybeAuthUser
 where
-    B: http_body::Body + Send,
-    B::Data: Send,
-    B::Error: Into<BoxError>,
+    B: Send,
 {
     type Rejection = Error;
 
