@@ -16,7 +16,7 @@ and observations. When a comment uses "we", it does not necessarily indicate an 
 Launchbadge, but rather an interpretation, by that one person, of the current consensus at Launchbadge, 
 or an observation of a particular sentiment shared by several developers at Launchbadge.
 
-[Realworld]: https://gothinkster.github.io/realworld/
+[Realworld]: https://github.com/gothinkster/realworld
 [Axum]: https://github.com/tokio-rs/axum/
 [SQLX]: https://github.com/launchbadge/sqlx/
 [PostgreSQL]: https://www.postgresql.org/
