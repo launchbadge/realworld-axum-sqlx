@@ -1,7 +1,6 @@
-use axum::body::{Bytes, Full, HttpBody};
 use axum::http::header::WWW_AUTHENTICATE;
-use axum::http::{HeaderMap, HeaderValue, Response, StatusCode};
-use axum::response::IntoResponse;
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use sqlx::error::DatabaseError;
 use std::borrow::Cow;
@@ -117,10 +116,7 @@ impl Error {
 /// By default, the generated `Display` impl is used to return a plaintext error message
 /// to the client.
 impl IntoResponse for Error {
-    type Body = Full<Bytes>;
-    type BodyError = <Full<Bytes> as HttpBody>::Error;
-
-    fn into_response(self) -> Response<Self::Body> {
+    fn into_response(self) -> Response {
         match self {
             Self::UnprocessableEntity { errors } => {
                 #[derive(serde::Serialize)]

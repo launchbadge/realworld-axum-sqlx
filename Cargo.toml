@@ -11,37 +11,34 @@ authors = [
 
 [dependencies]
 # Core dependencies: runtime, HTTP framework and database client.
-futures = "0.3"
-tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
-axum = { version = "0.3.4", features = ["tower-log"] }
-sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
-
-# The `clap` beta gives us a much nicer way to define configuration parameters for our application.
-clap = "3.0.0-beta.5"
-
-serde = { version = "1.0.130", features = ["derive"] }
+futures = "0.3.19"
+tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
+axum = { version = "0.4.5", features = ["tower-log"] }
+sqlx = { version = "0.5.10", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
+clap = { version = "3.0.14", features = ["derive", "env"] }
+serde = { version = "1.0.136", features = ["derive"] }
 
 # State of the art password hashing.
-argon2 = "0.3.1"
+argon2 = "0.3.3"
 
 # Axum builds on the types in Tower
 tower = "0.4.11"
-tower-http = { version = "0.2.0", features = ["trace"] }
+tower-http = { version = "0.2.1", features = ["trace"] }
 
-jwt = "0.15.0"
-hmac = "0.11.0"
-sha2 = "0.9.8"
+jwt = "0.16.0"
+hmac = "0.12.0"
+sha2 = "0.10.1"
 
 time = "0.2"
 
-uuid = { version = "0.8", features = ["serde"] }
+uuid = { version = "0.8.2", features = ["serde"] }
 
 # Utility Crates
-anyhow = "1.0.48"
-async-trait = "0.1.51"
+anyhow = "1.0.53"
+async-trait = "0.1.52"
 dotenv = "0.15.0"
 env_logger = "0.9.0"
-itertools = "0.10.1"
+itertools = "0.10.3"
 log = "0.4.14"
 rand = "0.8.4"
 thiserror = "1.0.30"
