@@ -1110,7 +1110,7 @@ dependencies = [
  "time",
  "tokio",
  "tower",
- "tower-http 0.2.0",
+ "tower-http 0.2.1",
  "uuid",
 ]
 
@@ -1728,9 +1728,9 @@ dependencies = [
 
 [[package]]
 name = "tower-http"
-version = "0.2.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39ee603d6e665ecc7e0f8d479eedb4626bd4726f0ee6119cee5b3a6bf184cac0"
+checksum = "03650267ad175b51c47d02ed9547fc7d4ba2c7e5cb76df0bed67edd1825ae297"
 dependencies = [
  "bitflags",
  "bytes",
