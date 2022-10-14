@@ -2,15 +2,15 @@ use crate::http::error::ResultExt;
 use crate::http::extractor::{AuthUser, MaybeAuthUser};
 use crate::http::ApiContext;
 use crate::http::{Error, Result};
-use axum::extract::{Extension, Path};
+use axum::extract::{Path, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 
 // The `profiles` routes are very similar to the `users` routes, except they allow looking up
 // other users' data.
 
-pub fn router() -> Router {
-    Router::new()
+pub(crate) fn router() -> Router<ApiContext> {
+    Router::inherit_state()
         .route("/api/profiles/:username", get(get_user_profile))
         .route(
             "/api/profiles/:username/follow",
@@ -40,7 +40,7 @@ async fn get_user_profile(
     //
     // See the docs for `MaybeAuthUser` for why this isn't just `Option<AuthUser>`.
     maybe_auth_user: MaybeAuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     // Destructuring `Path()` is something I've missed in Actix-web since it was removed
     // in the 4.0 beta: https://github.com/actix/actix-web/pull/2160
     // Needless to say, I'm delighted that Axum has it.
@@ -75,7 +75,7 @@ async fn get_user_profile(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#follow-user
 async fn follow_user(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(username): Path<String>,
 ) -> Result<Json<ProfileBody>> {
     // You can implement this either with a single query using Common Table Expressions (CTEs),
@@ -136,7 +136,7 @@ async fn follow_user(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#unfollow-user
 async fn unfollow_user(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(username): Path<String>,
 ) -> Result<Json<ProfileBody>> {
     // This is basically identical to `follow_user()` user except we're deleting from `follow`.

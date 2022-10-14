@@ -1,4 +1,4 @@
-use axum::extract::{Extension, Query};
+use axum::extract::{Query, State};
 use axum::Json;
 use futures::TryStreamExt;
 
@@ -79,7 +79,7 @@ pub struct MultipleArticlesBody {
 pub(in crate::http) async fn list_articles(
     // authentication is optional
     maybe_auth_user: MaybeAuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     query: Query<ListArticlesQuery>,
 ) -> http::Result<Json<MultipleArticlesBody>> {
     let articles: Vec<_> = sqlx::query_as!(
@@ -157,7 +157,7 @@ pub(in crate::http) async fn list_articles(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#feed-articles
 pub(in crate::http) async fn feed_articles(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     query: Query<FeedArticlesQuery>,
 ) -> http::Result<Json<MultipleArticlesBody>> {
     let articles: Vec<_> = sqlx::query_as!(

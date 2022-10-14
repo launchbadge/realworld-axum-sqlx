@@ -2,17 +2,17 @@ use crate::http::{ApiContext, Result};
 use anyhow::Context;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash};
-use axum::extract::Extension;
+use axum::extract::State;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 
 use crate::http::error::{Error, ResultExt};
 use crate::http::extractor::AuthUser;
 
-pub fn router() -> Router {
+pub(crate) fn router() -> Router<ApiContext> {
     // By having each module responsible for setting up its own routing,
     // it makes the root module a lot cleaner.
-    Router::new()
+    Router::inherit_state()
         .route("/api/users", post(create_user))
         .route("/api/users/login", post(login_user))
         .route("/api/user", get(get_current_user).put(update_user))
@@ -58,7 +58,7 @@ struct User {
 
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#registration
 async fn create_user(
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Json(req): Json<UserBody<NewUser>>,
 ) -> Result<Json<UserBody<User>>> {
     let password_hash = hash_password(req.user.password).await?;
@@ -97,7 +97,7 @@ async fn create_user(
 
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#authentication
 async fn login_user(
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Json(req): Json<UserBody<LoginUser>>,
 ) -> Result<Json<UserBody<User>>> {
     let user = sqlx::query!(
@@ -130,7 +130,7 @@ async fn login_user(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-current-user
 async fn get_current_user(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
 ) -> Result<Json<UserBody<User>>> {
     let user = sqlx::query!(
         r#"select email, username, bio, image from "user" where user_id = $1"#,
@@ -160,7 +160,7 @@ async fn get_current_user(
 // However, we have a spec to follow so `PUT` it is.
 async fn update_user(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Json(req): Json<UserBody<UpdateUser>>,
 ) -> Result<Json<UserBody<User>>> {
     if req.user == UpdateUser::default() {

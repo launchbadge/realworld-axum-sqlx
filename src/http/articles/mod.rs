@@ -1,4 +1,4 @@
-use axum::extract::{Extension, Path};
+use axum::extract::{Path, State};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use itertools::Itertools;
@@ -13,11 +13,11 @@ use crate::http::{ApiContext, Error, Result, ResultExt};
 mod comments;
 mod listing;
 
-pub fn router() -> Router {
+pub(crate) fn router() -> Router<ApiContext> {
     // I would prefer `listing` to have its own `router()` method and keep the handler
     // functions private, however that doesn't really work here as we need to list all the
     // verbs under the same path exactly once.
-    Router::new()
+    Router::inherit_state()
         .route(
             "/api/articles",
             post(create_article).get(listing::list_articles),
@@ -136,7 +136,7 @@ impl ArticleFromQuery {
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#create-article
 async fn create_article(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Json(mut req): Json<ArticleBody<CreateArticle>>,
 ) -> Result<Json<ArticleBody>> {
     let slug = slugify(&req.article.title);
@@ -203,7 +203,7 @@ async fn create_article(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#update-article
 async fn update_article(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
     Json(req): Json<ArticleBody<UpdateArticle>>,
 ) -> Result<Json<ArticleBody>> {
@@ -299,7 +299,7 @@ async fn update_article(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#delete-article
 async fn delete_article(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
 ) -> Result<()> {
     let result = sqlx::query!(
@@ -350,7 +350,7 @@ async fn get_article(
     // The spec states "no authentication required" but should probably state
     // "authentication optional" because we still need to check if the user is following the author.
     maybe_auth_user: MaybeAuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
 ) -> Result<Json<ArticleBody>> {
     let article = sqlx::query_as!(
@@ -394,7 +394,7 @@ async fn get_article(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#favorite-article
 async fn favorite_article(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
 ) -> Result<Json<ArticleBody>> {
     // This is kind of where the pattern of "always return the updated object" gets a bit annoying,
@@ -434,7 +434,7 @@ async fn favorite_article(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#unfavorite-article
 async fn unfavorite_article(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
 ) -> Result<Json<ArticleBody>> {
     // The Realworld spec doesn't say what to do if the user calls this on an article
@@ -467,7 +467,7 @@ async fn unfavorite_article(
 }
 
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-tags
-async fn get_tags(ctx: Extension<ApiContext>) -> Result<Json<TagsBody>> {
+async fn get_tags(ctx: State<ApiContext>) -> Result<Json<TagsBody>> {
     // Note: this query requires a full table scan and is a likely point for a DoS attack.
     //
     // In practice, I might consider storing unique tags in their own table and then the

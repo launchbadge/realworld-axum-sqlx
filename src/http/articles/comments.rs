@@ -3,15 +3,15 @@ use crate::http::profiles::Profile;
 use crate::http::types::Timestamptz;
 use crate::http::ApiContext;
 use crate::http::{Error, Result};
-use axum::extract::{Extension, Path};
+use axum::extract::{Path, State};
 use axum::routing::{delete, get};
 use axum::{Json, Router};
 use futures::TryStreamExt;
 use time::OffsetDateTime;
 
-pub fn router() -> Router {
+pub(crate) fn router() -> Router<ApiContext> {
     // Unlike those in `listing`, these routes are fortunately all self-contained
-    Router::new()
+    Router::inherit_state()
         .route(
             "/api/articles/:slug/comments",
             get(get_article_comments).post(add_comment),
@@ -80,7 +80,7 @@ impl CommentFromQuery {
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#get-comments-from-an-article
 async fn get_article_comments(
     maybe_auth_user: MaybeAuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
 ) -> Result<Json<MultipleCommentsBody>> {
     // With this, we can return 404 if the article slug was not found.
@@ -120,7 +120,7 @@ async fn get_article_comments(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#add-comments-to-an-article
 async fn add_comment(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path(slug): Path<String>,
     req: Json<CommentBody<AddComment>>,
 ) -> Result<Json<CommentBody>> {
@@ -163,7 +163,7 @@ async fn add_comment(
 // https://realworld-docs.netlify.app/docs/specs/backend-specs/endpoints#delete-comment
 async fn delete_comment(
     auth_user: AuthUser,
-    ctx: Extension<ApiContext>,
+    ctx: State<ApiContext>,
     Path((slug, comment_id)): Path<(String, i64)>,
 ) -> Result<()> {
     // Identical technique to `articles::delete_article()`

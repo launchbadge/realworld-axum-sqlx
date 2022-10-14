@@ -1,5 +1,5 @@
 use crate::http::error::Error;
-use axum::extract::{Extension, FromRequestParts};
+use axum::extract::{FromRef, FromRequestParts};
 use axum::http::request::Parts;
 
 use crate::http::ApiContext;
@@ -150,13 +150,12 @@ impl MaybeAuthUser {
 impl<S> FromRequestParts<S> for AuthUser
 where
     S: Send + Sync,
+    ApiContext: FromRef<S>,
 {
     type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let ctx: Extension<ApiContext> = Extension::from_request_parts(parts, state)
-            .await
-            .expect("BUG: ApiContext was not added as an extension");
+        let ctx: ApiContext = ApiContext::from_ref(state);
 
         // Get the value of the `Authorization` header, if it was sent at all.
         let auth_header = parts
@@ -172,13 +171,12 @@ where
 impl<S> FromRequestParts<S> for MaybeAuthUser
 where
     S: Send + Sync,
+    ApiContext: FromRef<S>,
 {
     type Rejection = Error;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let ctx: Extension<ApiContext> = Extension::from_request_parts(parts, state)
-            .await
-            .expect("BUG: ApiContext was not added as an extension");
+        let ctx: ApiContext = ApiContext::from_ref(state);
 
         Ok(Self(
             // Get the value of the `Authorization` header, if it was sent at all.

@@ -1,9 +1,8 @@
 use crate::config::Config;
 use anyhow::Context;
-use axum::{Extension, Router};
+use axum::Router;
 use sqlx::PgPool;
 use std::sync::Arc;
-use tower::ServiceBuilder;
 
 // Utility modules.
 
@@ -41,7 +40,7 @@ use tower_http::trace::TraceLayer;
 
 /// The core type through which handler functions can access common API state.
 ///
-/// This can be accessed by adding a parameter `Extension<ApiContext>` to a handler function's
+/// This can be accessed by adding a parameter `State<ApiContext>` to a handler function's
 /// parameters.
 ///
 /// In other projects I've passed this stuff as separate objects, e.g.
@@ -53,12 +52,17 @@ use tower_http::trace::TraceLayer;
 /// on and off, and disable any unused extension objects) but it's really up to a
 /// judgement call.
 #[derive(Clone)]
-struct ApiContext {
+pub(crate) struct ApiContext {
     config: Arc<Config>,
     db: PgPool,
 }
 
 pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
+    let api_context = ApiContext {
+        config: Arc::new(config),
+        db,
+    };
+
     // Bootstrapping an API is both more intuitive with Axum than Actix-web but also
     // a bit more confusing at the same time.
     //
@@ -68,19 +72,9 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
     // It does look nicer than the mess of `move || {}` closures you have to do with Actix-web,
     // which, I suspect, largely has to do with how it manages its own worker threads instead of
     // letting Tokio do it.
-    let app = api_router().layer(
-        ServiceBuilder::new()
-            // The other reason for using a single object is because `AddExtensionLayer::new()` is
-            // rather verbose compared to Actix-web's `Data::new()`.
-            //
-            // It seems very logically named, but that makes it a bit annoying to type over and over.
-            .layer(Extension(ApiContext {
-                config: Arc::new(config),
-                db,
-            }))
-            // Enables logging. Use `RUST_LOG=tower_http=debug`
-            .layer(TraceLayer::new_for_http()),
-    );
+    let app = api_router(api_context)
+        // Enables logging. Use `RUST_LOG=tower_http=debug`
+        .layer(TraceLayer::new_for_http());
 
     // We use 8080 as our default HTTP server port, it's pretty easy to remember.
     //
@@ -92,9 +86,10 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
         .context("error running HTTP server")
 }
 
-fn api_router() -> Router {
+fn api_router(api_context: ApiContext) -> Router<ApiContext> {
     // This is the order that the modules were authored in.
-    users::router()
+    Router::with_state(api_context)
+        .merge(users::router())
         .merge(profiles::router())
         .merge(articles::router())
 }
