@@ -1,4 +1,5 @@
 # realworld-axum-sqlx
+
 A Rust implementation of the [Realworld] demo app spec showcasing the use of the [Axum] web framework and [SQLx]
 SQL database client, with [PostgreSQL] as the database backend.
 
@@ -8,6 +9,11 @@ in flux, and a major point of this project was to experiment with project archit
 best practices might look like.
 
 Feedback is appreciated!
+
+## This is a fork!
+
+Note that this repo is a fork of https://github.com/launchbadge/realworld-axum-sqlx that has been updated to the
+latest version of axum and sqlx.
 
 ### Note: "I" vs "we"
 
