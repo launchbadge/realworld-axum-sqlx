@@ -18,7 +18,7 @@ axum = { git = "https://github.com/tokio-rs/axum.git", features = ["tower-log"] 
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.
-clap = { version = "3.0.0", features = ["derive", "env"] }
+clap = { version = "4.0.0", features = ["derive", "env"] }
 
 serde = { version = "1.0.130", features = ["derive"] }
 
