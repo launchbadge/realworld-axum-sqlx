@@ -13,6 +13,7 @@ authors = [
 # Core dependencies: runtime, HTTP framework and database client.
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
+# We can disable axum's `tower-log` feature if we switch to tracing
 axum = { git = "https://github.com/tokio-rs/axum.git", features = ["tower-log"] }
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 

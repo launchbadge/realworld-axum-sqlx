@@ -2,7 +2,10 @@ use crate::config::Config;
 use anyhow::Context;
 use axum::Router;
 use sqlx::PgPool;
-use std::sync::Arc;
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    sync::Arc,
+};
 
 // Utility modules.
 
@@ -80,7 +83,8 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
     //
     // Note that any port below 1024 needs superuser privileges to bind on Linux,
     // so 80 isn't usually used as a default for that reason.
-    axum::Server::bind(&"0.0.0.0:8080".parse()?)
+    let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, 8080));
+    axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
         .context("error running HTTP server")

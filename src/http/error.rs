@@ -1,5 +1,5 @@
 use axum::http::header::WWW_AUTHENTICATE;
-use axum::http::{HeaderMap, HeaderValue, StatusCode};
+use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
 use sqlx::error::DatabaseError;
@@ -138,9 +138,7 @@ impl IntoResponse for Error {
                     //
                     // However, at Launchbadge we try to adhere to web standards wherever possible,
                     // if nothing else than to try to act as a vanguard of sanity on the web.
-                    [(WWW_AUTHENTICATE, HeaderValue::from_static("Token"))]
-                        .into_iter()
-                        .collect::<HeaderMap>(),
+                    [(WWW_AUTHENTICATE, "Token")],
                     self.to_string(),
                 )
                     .into_response();
