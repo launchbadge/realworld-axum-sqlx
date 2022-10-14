@@ -14,6 +14,7 @@ authors = [
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
 # We can disable axum's `tower-log` feature if we switch to tracing
+# for the `0.6.0-rc.2` version see the branch called `0.6.0-rc`
 axum = { git = "https://github.com/tokio-rs/axum.git", features = ["tower-log"] }
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
