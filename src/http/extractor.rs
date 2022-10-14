@@ -1,6 +1,6 @@
 use crate::http::error::Error;
-use axum::body::Body;
-use axum::extract::{Extension, FromRequest, RequestParts};
+use axum::extract::{Extension, FromRequestParts};
+use axum::http::request::Parts;
 
 use crate::http::ApiContext;
 use async_trait::async_trait;
@@ -147,18 +147,20 @@ impl MaybeAuthUser {
 // out of it that you couldn't write your own middleware for, except with a bunch of extra
 // boilerplate.
 #[async_trait]
-impl FromRequest for AuthUser {
+impl<S> FromRequestParts<S> for AuthUser
+where
+    S: Send + Sync,
+{
     type Rejection = Error;
 
-    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
-        let ctx: Extension<ApiContext> = Extension::from_request(req)
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let ctx: Extension<ApiContext> = Extension::from_request_parts(parts, state)
             .await
             .expect("BUG: ApiContext was not added as an extension");
 
         // Get the value of the `Authorization` header, if it was sent at all.
-        let auth_header = req
-            .headers()
-            .ok_or(Error::Unauthorized)?
+        let auth_header = parts
+            .headers
             .get(AUTHORIZATION)
             .ok_or(Error::Unauthorized)?;
 
@@ -167,21 +169,23 @@ impl FromRequest for AuthUser {
 }
 
 #[async_trait]
-impl FromRequest for MaybeAuthUser {
+impl<S> FromRequestParts<S> for MaybeAuthUser
+where
+    S: Send + Sync,
+{
     type Rejection = Error;
 
-    async fn from_request(req: &mut RequestParts<Body>) -> Result<Self, Self::Rejection> {
-        let ctx: Extension<ApiContext> = Extension::from_request(req)
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let ctx: Extension<ApiContext> = Extension::from_request_parts(parts, state)
             .await
             .expect("BUG: ApiContext was not added as an extension");
 
         Ok(Self(
             // Get the value of the `Authorization` header, if it was sent at all.
-            req.headers()
-                .and_then(|headers| {
-                    let auth_header = headers.get(AUTHORIZATION)?;
-                    Some(AuthUser::from_authorization(&ctx, auth_header))
-                })
+            parts
+                .headers
+                .get(AUTHORIZATION)
+                .map(|auth_header| AuthUser::from_authorization(&ctx, auth_header))
                 .transpose()?,
         ))
     }

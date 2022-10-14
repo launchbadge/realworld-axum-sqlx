@@ -1,6 +1,6 @@
 use crate::config::Config;
 use anyhow::Context;
-use axum::{AddExtensionLayer, Router};
+use axum::{Extension, Router};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tower::ServiceBuilder;
@@ -74,7 +74,7 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
             // rather verbose compared to Actix-web's `Data::new()`.
             //
             // It seems very logically named, but that makes it a bit annoying to type over and over.
-            .layer(AddExtensionLayer::new(ApiContext {
+            .layer(Extension(ApiContext {
                 config: Arc::new(config),
                 db,
             }))
