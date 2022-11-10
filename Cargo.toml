@@ -13,9 +13,7 @@ authors = [
 # Core dependencies: runtime, HTTP framework and database client.
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
-# We can disable axum's `tower-log` feature if we switch to tracing
-# for the `0.6.0-rc.2` version see the branch called `0.6.0-rc`
-axum = { git = "https://github.com/tokio-rs/axum.git", features = ["tower-log"] }
+axum = { version = "0.6.0-rc.4", features = ["tower-log"] }
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.
@@ -26,7 +24,7 @@ serde = { version = "1.0.130", features = ["derive"] }
 # State of the art password hashing.
 argon2 = "0.3.1"
 
-# Axum builds on the types in Tower
+# axum builds on the types in Tower
 tower = "0.4.11"
 tower-http = { version = "0.3.0", features = ["trace"] }
 
