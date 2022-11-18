@@ -17,7 +17,7 @@ pub(crate) fn router() -> Router<ApiContext> {
     // I would prefer `listing` to have its own `router()` method and keep the handler
     // functions private, however that doesn't really work here as we need to list all the
     // verbs under the same path exactly once.
-    Router::inherit_state()
+    Router::new()
         .route(
             "/api/articles",
             post(create_article).get(listing::list_articles),

@@ -13,7 +13,7 @@ authors = [
 # Core dependencies: runtime, HTTP framework and database client.
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
-axum = { version = "0.6.0-rc.4", features = ["tower-log"] }
+axum = { version = "0.6.0-rc.5", features = ["tower-log"] }
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.

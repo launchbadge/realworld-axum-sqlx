@@ -11,7 +11,7 @@ use time::OffsetDateTime;
 
 pub(crate) fn router() -> Router<ApiContext> {
     // Unlike those in `listing`, these routes are fortunately all self-contained
-    Router::inherit_state()
+    Router::new()
         .route(
             "/api/articles/:slug/comments",
             get(get_article_comments).post(add_comment),

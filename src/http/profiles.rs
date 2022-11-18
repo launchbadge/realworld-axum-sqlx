@@ -10,7 +10,7 @@ use axum::{Json, Router};
 // other users' data.
 
 pub(crate) fn router() -> Router<ApiContext> {
-    Router::inherit_state()
+    Router::new()
         .route("/api/profiles/:username", get(get_user_profile))
         .route(
             "/api/profiles/:username/follow",

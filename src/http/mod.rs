@@ -1,6 +1,6 @@
 use crate::config::Config;
 use anyhow::Context;
-use axum::Router;
+use axum::{Router, RouterService};
 use sqlx::PgPool;
 use std::{
     net::{Ipv4Addr, SocketAddr},
@@ -75,9 +75,7 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
     // It does look nicer than the mess of `move || {}` closures you have to do with Actix-web,
     // which, I suspect, largely has to do with how it manages its own worker threads instead of
     // letting Tokio do it.
-    let app = api_router(api_context)
-        // Enables logging. Use `RUST_LOG=tower_http=debug`
-        .layer(TraceLayer::new_for_http());
+    let app = api_router(api_context);
 
     // We use 8080 as our default HTTP server port, it's pretty easy to remember.
     //
@@ -90,10 +88,13 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
         .context("error running HTTP server")
 }
 
-fn api_router(api_context: ApiContext) -> Router<ApiContext> {
+fn api_router(api_context: ApiContext) -> RouterService {
     // This is the order that the modules were authored in.
-    Router::with_state(api_context)
+    Router::new()
         .merge(users::router())
         .merge(profiles::router())
         .merge(articles::router())
+        // Enables logging. Use `RUST_LOG=tower_http=debug`
+        .layer(TraceLayer::new_for_http())
+        .with_state(api_context)
 }
