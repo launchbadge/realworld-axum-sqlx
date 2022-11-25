@@ -1,6 +1,6 @@
 use crate::config::Config;
 use anyhow::Context;
-use axum::{Router, RouterService};
+use axum::Router;
 use sqlx::PgPool;
 use std::{
     net::{Ipv4Addr, SocketAddr},
@@ -88,7 +88,7 @@ pub async fn serve(config: Config, db: PgPool) -> anyhow::Result<()> {
         .context("error running HTTP server")
 }
 
-fn api_router(api_context: ApiContext) -> RouterService {
+fn api_router(api_context: ApiContext) -> Router {
     // This is the order that the modules were authored in.
     Router::new()
         .merge(users::router())
