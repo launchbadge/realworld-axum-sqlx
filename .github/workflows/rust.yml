@@ -45,20 +45,3 @@ jobs:
       run: cargo build --verbose
     - name: Run unit tests
       run: cargo test --verbose
-    - name: Checkout Realworld Repo
-      uses: actions/checkout@v2
-      with:
-        repository: abonander/realworld
-        # FIXME: we actually require this PR for the tests to pass: https://github.com/gothinkster/realworld/pull/490
-        # At the time of writing, #490 has a bug that hardcodes `APIURL` so it's not useful for testing here.
-        # For now, this is actually my (@abonander) fork of that fork, with that bug fixed.
-        ref: ccb6ab8aa4b10397cbfa4262e64fc5a306d63cb2
-        path: realworld
-    - name: Run Realworld Postman collection
-      env:
-        APIURL: http://localhost:8080/api
-      run: |
-        cargo run&
-        sleep 5
-        cd realworld/api
-        ./run-api-tests.sh
