@@ -217,7 +217,7 @@ async fn update_article(
         "select article_id, user_id from article where slug = $1 for update",
         slug
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(Error::NotFound)?;
 
@@ -280,7 +280,7 @@ async fn update_article(
         article_meta.article_id,
         auth_user.user_id
     )
-    .fetch_one(&mut tx)
+    .fetch_one(&mut *tx)
     .await
     .on_constraint("article_slug_key", |_| {
         Error::unprocessable_entity([(

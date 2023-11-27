@@ -104,7 +104,7 @@ async fn follow_user(
         r#"select user_id, username, bio, image from "user" where username = $1"#,
         username
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(Error::NotFound)?;
 
@@ -114,7 +114,7 @@ async fn follow_user(
         auth_user.user_id,
         user.user_id
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await
     // Handle this check constraint
     .on_constraint("user_cannot_follow_self", |_| Error::Forbidden)?;
@@ -147,7 +147,7 @@ async fn unfollow_user(
         r#"select user_id, username, bio, image from "user" where username = $1"#,
         username
     )
-    .fetch_optional(&mut tx)
+    .fetch_optional(&mut *tx)
     .await?
     .ok_or(Error::NotFound)?;
 
@@ -156,7 +156,7 @@ async fn unfollow_user(
         auth_user.user_id,
         user.user_id
     )
-    .execute(&mut tx)
+    .execute(&mut *tx)
     .await?;
 
     // IMPORTANT! Without this, the changes we just made will be dropped.

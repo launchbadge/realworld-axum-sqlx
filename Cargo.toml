@@ -15,7 +15,7 @@ authors = [
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
 axum = { git = "https://github.com/tokio-rs/axum", rev = "15781fe22b7b1", features = ["tower-log"] }
-sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.
 clap = { version = "4.0.0", features = ["derive", "env"] }
@@ -23,7 +23,7 @@ clap = { version = "4.0.0", features = ["derive", "env"] }
 serde = { version = "1.0.130", features = ["derive"] }
 
 # State of the art password hashing.
-argon2 = "0.3.1"
+argon2 = "0.5"
 
 # axum builds on the types in Tower
 tower = "0.4.11"
@@ -33,7 +33,7 @@ jwt = "0.15.0"
 hmac = "0.11.0"
 sha2 = "0.9.8"
 
-time = "0.3"
+time = "0.3.30"
 
 uuid = { version = "1.0", features = ["serde"] }
 
