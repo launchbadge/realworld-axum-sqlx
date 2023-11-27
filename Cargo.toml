@@ -14,7 +14,7 @@ authors = [
 # Core dependencies: runtime, HTTP framework and database client.
 futures = "0.3"
 tokio = { version = "1.14.0", features = ["macros", "rt-multi-thread"] }
-axum = { version = "0.6.0", features = ["tower-log"] }
+axum = { git = "https://github.com/tokio-rs/axum", rev = "15781fe22b7b1", features = ["tower-log"] }
 sqlx = { version = "0.6", features = ["runtime-tokio-native-tls", "postgres", "uuid", "time"] }
 
 # The `clap` beta gives us a much nicer way to define configuration parameters for our application.
@@ -27,7 +27,7 @@ argon2 = "0.3.1"
 
 # axum builds on the types in Tower
 tower = "0.4.11"
-tower-http = { version = "0.3.0", features = ["trace"] }
+tower-http = { version = "0.5.0", features = ["trace"] }
 
 jwt = "0.15.0"
 hmac = "0.11.0"
