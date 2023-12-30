@@ -5,6 +5,7 @@ use argon2::{Argon2, PasswordHash};
 use axum::extract::Extension;
 use axum::routing::{get, post};
 use axum::{Json, Router};
+use futures::future::OptionFuture;
 
 use crate::http::error::{Error, ResultExt};
 use crate::http::extractor::AuthUser;
@@ -169,11 +170,9 @@ async fn update_user(
     }
 
     // WTB `Option::map_async()`
-    let password_hash = if let Some(password) = req.user.password {
-        Some(hash_password(password).await?)
-    } else {
-        None
-    };
+    let password_hash = OptionFuture::from(req.user.password.map(hash_password))
+        .await
+        .transpose()?;
 
     let user = sqlx::query!(
         // This is how we do optional updates of fields without needing a separate query for each.
@@ -218,7 +217,7 @@ async fn update_user(
 async fn hash_password(password: String) -> Result<String> {
     // Argon2 hashing is designed to be computationally intensive,
     // so we need to do this on a blocking thread.
-    Ok(tokio::task::spawn_blocking(move || -> Result<String> {
+    tokio::task::spawn_blocking(move || -> Result<String> {
         let salt = SaltString::generate(rand::thread_rng());
         Ok(
             PasswordHash::generate(Argon2::default(), password, salt.as_str())
@@ -227,11 +226,11 @@ async fn hash_password(password: String) -> Result<String> {
         )
     })
     .await
-    .context("panic in generating password hash")??)
+    .context("panic in generating password hash")?
 }
 
 async fn verify_password(password: String, password_hash: String) -> Result<()> {
-    Ok(tokio::task::spawn_blocking(move || -> Result<()> {
+    tokio::task::spawn_blocking(move || -> Result<()> {
         let hash = PasswordHash::new(&password_hash)
             .map_err(|e| anyhow::anyhow!("invalid password hash: {}", e))?;
 
@@ -242,5 +241,5 @@ async fn verify_password(password: String, password_hash: String) -> Result<()> 
             })
     })
     .await
-    .context("panic in verifying password hash")??)
+    .context("panic in verifying password hash")?
 }
